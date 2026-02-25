@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="mb-4">Главная страница</h1>
+    <p class="lead">Вы успешно вошли в систему 🎉</p>
+
+    <div class="card mx-auto mt-4" style="max-width: 400px;">
+        <div class="card-body">
+            <h5 class="card-title">Информация о пользователе</h5>
+            <p class="card-text">
+                Имя пользователя: <strong>{{ user.username }}</strong>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
