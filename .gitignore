@@ -70,10 +70,6 @@ coverage.xml
 ehthumbs.db
 Thumbs.db
 
-# Database (если используете SQLite)
-*.sqlite3
-*.db
-
 # Django
 *.log
 local_settings.py

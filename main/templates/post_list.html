@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="mb-4">Публикации</h2>
+
+<div class="row">
+{% for post in posts %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5>{{ post.title }}</h5>
+                {% if post.is_paid %}
+                    <span class="badge bg-warning">Платная</span>
+                {% else %}
+                    <span class="badge bg-success">Бесплатная</span>
+                {% endif %}
+                <a href="{% url 'post_detail' post.pk %}" class="btn btn-primary mt-2 w-100">
+                    Читать
+                </a>
+            </div>
+        </div>
+        </div>
+{% endfor %}
+</div>
+
+{% endblock %}

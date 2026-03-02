@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "main",
-    "users",
 
 ]
 
@@ -122,5 +121,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-LOGIN_REDIRECT_URL = 'main'  
-LOGOUT_REDIRECT_URL = 'login'
+AUTH_USER_MODEL = 'main.User'
+
+LOGIN_REDIRECT_URL = 'post_list'  
+LOGOUT_REDIRECT_URL = 'post_list'
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")

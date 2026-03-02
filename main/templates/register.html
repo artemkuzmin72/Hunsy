@@ -20,8 +20,8 @@
                     {% endif %}
 
                     <div class="mb-3">
-                        <label class="form-label">Имя пользователя</label>
-                        {{ form.username }}
+                        <label class="form-label">Номер телефона</label>
+                        {{ form.phone }}
                     </div>
 
                     <div class="mb-3">
@@ -41,7 +41,7 @@
 
                 <div class="text-center mt-3">
                     Уже есть аккаунт?
-                    <a href="{% url 'main.login' %}">Войти</a>
+                    <a href="{% url 'login' %}">Войти</a>
                 </div>
 
             </div>
