@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Оплата{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Оплата доступа</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h5>{{ post.current_version.title }}</h5>
+                        <h3 class="text-primary">${{ post.price }}</h3>
+                    </div>
+                    
+                    <form id="payment-form">
+                        {% csrf_token %}
+                        <div id="card-element" class="mb-3">
+                            <!-- Stripe Elements будет вставлен сюда -->
+                        </div>
+                        <div id="card-errors" class="alert alert-danger" style="display: none;"></div>
+                        
+                        <button id="submit-button" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-lock"></i> Оплатить ${{ post.price }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const stripe = Stripe('{{ stripe_public_key }}');
+const elements = stripe.elements();
+const cardElement = elements.create('card');
+cardElement.mount('#card-element');
+
+const form = document.getElementById('payment-form');
+const submitButton = document.getElementById('submit-button');
+
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Обработка...';
+    
+    const {paymentIntent, error} = await stripe.confirmCardPayment('{{ client_secret }}', {
+        payment_method: {
+            card: cardElement,
+        }
+    });
+    
+    if (error) {
+        document.getElementById('card-errors').style.display = 'block';
+        document.getElementById('card-errors').textContent = error.message;
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-lock"></i> Оплатить ${{ post.price }}';
+    } else {
+        // Отправляем подтверждение на сервер
+        const formData = new FormData();
+        formData.append('payment_intent_id', paymentIntent.id);
+        formData.append('amount', '{{ post.price }}');
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        
+        fetch('{% url "post_purchase_confirm" post.uuid %}', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

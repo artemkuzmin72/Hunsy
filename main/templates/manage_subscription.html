@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Управление подпиской{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Управление подпиской</h4>
+                </div>
+                <div class="card-body">
+                    {% if subscription %}
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Текущий план</h5>
+                                <p class="h4 text-primary">{{ subscription.plan.name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Статус</h5>
+                                <p>
+                                    <span class="badge bg-{% if subscription.status == 'active' %}success{% else %}warning{% endif %}">
+                                        {{ subscription.get_status_display }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Действует до</h5>
+                                <p>{{ subscription.current_period_end|date:"d.m.Y" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Автопродление</h5>
+                                <p>
+                                    {% if subscription.cancel_at_period_end %}
+                                        <span class="text-warning">Отключено после окончания периода</span>
+                                    {% else %}
+                                        <span class="text-success">Включено</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <form method="post" action="{% url 'manage_subscription' %}">
+                            {% csrf_token %}
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    Управлять в Stripe
+                                </button>
+                                <a href="{% url 'subscription_plans' %}" class="btn btn-outline-primary">
+                                    Сменить тариф
+                                </a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="lead">У вас нет активной подписки</p>
+                            <a href="{% url 'subscription_plans' %}" class="btn btn-primary btn-lg">
+                                Выбрать план
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

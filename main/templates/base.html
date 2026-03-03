@@ -27,6 +27,16 @@
                         {% csrf_token %}
                         <button class="nav-link" type="submit">Выйти</button>
                     </form>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'subscription_plans' %}">
+                            <i class="fas fa-crown"></i> Подписка
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'manage_subscription' %}">
+                            Управление подпиской
+                        </a>
+                    </li>
 
                 {% else %}
                     <li class="nav-item">

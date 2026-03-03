@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Удаление поста{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Удаление поста</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Вы уверены, что хотите удалить пост "{{ post.current_version.title }}"?</p>
+                    <p class="text-danger"><strong>Внимание!</strong> Это действие нельзя отменить. Все версии поста будут удалены.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'post_detail' post.uuid %}" class="btn btn-secondary me-md-2">Отмена</a>
+                            <button type="submit" class="btn btn-danger">Удалить пост</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

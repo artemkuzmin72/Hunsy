@@ -1,7 +1,94 @@
 {% extends "base.html" %}
+
+{% block title %}{{ version.title }}{% endblock %}
+
 {% block content %}
-
-<h2>{{ post.title }}</h2>
-<p>{{ post.content }}</p>
-
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <article class="card shadow">
+                {% if version.featured_image %}
+                    <img src="{{ version.featured_image.url }}" class="card-img-top" alt="{{ version.title }}">
+                {% endif %}
+                
+                <div class="card-body">
+                    <h1 class="card-title">{{ version.title }}</h1>
+                    
+                    <div class="text-muted mb-3">
+                        <small>
+                            Автор: {{ post.author.phone }} | 
+                            Дата: {{ version.created_at|date:"d.m.Y H:i" }} |
+                            Язык: {{ version.get_language_display }} |
+                            Версия: {{ version.version_number }}
+                            {% if version.change_summary %}
+                                | Изменения: {{ version.change_summary }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    
+                    {% if post.status == 'published' %}
+                        <div class="mb-3">
+                            <span class="badge bg-success">Опубликован</span>
+                            <span class="badge bg-info">Просмотров: {{ post.view_count }}</span>
+                        </div>
+                    {% elif post.status == 'draft' %}
+                        <span class="badge bg-warning">Черновик</span>
+                    {% endif %}
+                    
+                    <div class="card-text mt-4">
+                        {{ version.content|linebreaks }}
+                    </div>
+                </div>
+            </article>
+        </div>
+        
+        <div class="col-md-4">
+            {% if user == post.author %}
+                <div class="card shadow mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Управление</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'post_edit' post.uuid %}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit"></i> Новая версия
+                            </a>
+                            <a href="{% url 'post_settings' post.uuid %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-cog"></i> Настройки
+                            </a>
+                            <a href="{% url 'post_versions' post.uuid %}" class="btn btn-outline-info">
+                                <i class="fas fa-code-branch"></i> Все версии ({{ post.versions.count }})
+                            </a>
+                            <a href="{% url 'post_list' %}" class="btn btn-outline-success">
+                                <i class="fas fa-list"></i> Мои посты
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if versions %}
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Другие версии</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for v in versions %}
+                                <li class="list-group-item {% if v.id == version.id %}active{% endif %}">
+                                    <a href="?version={{ v.id }}" class="{% if v.id == version.id %}text-white{% endif %}">
+                                        Версия {{ v.version_number }} ({{ v.created_at|date:"d.m.Y" }})
+                                        {% if v.change_summary %}
+                                            <br><small>{{ v.change_summary|truncatechars:30 }}</small>
+                                        {% endif %}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

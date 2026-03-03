@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование поста{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Редактирование поста (создание новой версии)</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Ошибка!</strong> Пожалуйста, исправьте ошибки ниже.
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.summary.id_for_label }}" class="form-label">{{ form.summary.label }}</label>
+                            {{ form.summary }}
+                            {% if form.summary.errors %}
+                                <div class="text-danger">{{ form.summary.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.content.id_for_label }}" class="form-label">{{ form.content.label }}</label>
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <div class="text-danger">{{ form.content.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.language.id_for_label }}" class="form-label">{{ form.language.label }}</label>
+                                {{ form.language }}
+                                {% if form.language.errors %}
+                                    <div class="text-danger">{{ form.language.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.featured_image.id_for_label }}" class="form-label">{{ form.featured_image.label }}</label>
+                                {{ form.featured_image }}
+                                {% if form.featured_image.errors %}
+                                    <div class="text-danger">{{ form.featured_image.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.change_summary.id_for_label }}" class="form-label">{{ form.change_summary.label }}</label>
+                            {{ form.change_summary }}
+                            {% if form.change_summary.errors %}
+                                <div class="text-danger">{{ form.change_summary.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" name="make_current" id="make_current" class="form-check-input">
+                            <label for="make_current" class="form-check-label">
+                                Сделать эту версию текущей
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'post_detail' post.uuid %}" class="btn btn-secondary me-md-2">Отмена</a>
+                            <button type="submit" class="btn btn-primary">Создать версию</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
