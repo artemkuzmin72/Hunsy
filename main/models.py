@@ -106,6 +106,8 @@ class Post(models.Model):
         indexes = [
             models.Index(fields=['author', 'status']),
             models.Index(fields=['-published_at']),
+            models.Index(fields=['access_type']),  
+            models.Index(fields=['status']),       
         ]
     
     def __str__(self):
