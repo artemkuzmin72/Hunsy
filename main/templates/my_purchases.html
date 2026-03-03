@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Мои покупки{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Мои приобретённые посты</h1>
+    
+    {% if purchases %}
+        <div class="row">
+            {% for purchase in purchases %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        {% if purchase.post.current_version.featured_image %}
+                            <img src="{{ purchase.post.current_version.featured_image.url }}" 
+                                 class="card-img-top" alt="{{ purchase.post.current_version.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ purchase.post.current_version.title }}</h5>
+                            <p class="card-text">{{ purchase.post.current_version.summary|truncatechars:150 }}</p>
+                            
+                            <div class="text-muted small mb-2">
+                                <i class="fas fa-calendar"></i> Куплено: {{ purchase.purchased_at|date:"d.m.Y H:i" }}<br>
+                                <i class="fas fa-tag"></i> Цена: ${{ purchase.amount }}
+                            </div>
+                            
+                            <a href="{% url 'post_detail' purchase.post.uuid %}" class="btn btn-primary">
+                                <i class="fas fa-book-open"></i> Читать
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> У вас пока нет купленных постов.
+            <a href="{% url 'post_list' %}" class="alert-link">Посмотреть доступные посты</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

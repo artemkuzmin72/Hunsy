@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Подписка оформлена{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow text-center">
+                <div class="card-body">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    
+                    <h2 class="mb-4">Спасибо за подписку!</h2>
+                    
+                    <p class="lead">
+                        Ваша подписка на план <strong>{{ subscription.plan.name }}</strong> 
+                        успешно оформлена.
+                    </p>
+                    
+                    <p>
+                        Период подписки: с {{ subscription.current_period_start|date:"d.m.Y" }} 
+                        по {{ subscription.current_period_end|date:"d.m.Y" }}
+                    </p>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'profile' %}" class="btn btn-primary">
+                            Перейти в профиль
+                        </a>
+                        <a href="{% url 'index' %}" class="btn btn-outline-primary">
+                            На главную
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

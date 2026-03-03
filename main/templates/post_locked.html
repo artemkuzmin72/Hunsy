@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Доступ ограничен{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow text-center">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-lock text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    
+                    <h2 class="mb-3">Этот пост доступен по подписке</h2>
+                    
+                    <p class="lead mb-4">
+                        "{{ post.current_version.title }}"
+                    </p>
+                    
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Цена: ${{ post.price }}</h5>
+                        <p class="mb-0">После оплаты вы получите постоянный доступ к этому посту</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'post_purchase' post.uuid %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-shopping-cart"></i> Купить доступ за ${{ post.price }}
+                        </a>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-muted">
+                        <p>Уже купили? <a href="{% url 'login' %}">Войдите</a> в свой аккаунт</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -126,5 +126,14 @@ AUTH_USER_MODEL = 'main.User'
 LOGIN_REDIRECT_URL = 'post_list'  
 LOGOUT_REDIRECT_URL = 'post_list'
 
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', 'pk_test_...')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_...')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', 'whsec_...')
+
+# Настройки для подписок
+STRIPE_PRICE_IDS = {
+    'basic_monthly': 'price_basic_monthly_id',
+    'premium_monthly': 'price_premium_monthly_id',
+    'basic_yearly': 'price_basic_yearly_id',
+    'premium_yearly': 'price_premium_yearly_id',
+}

@@ -1,14 +1,79 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Добро пожаловать{% endblock %}
+{% block title %}Главная{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h1 class="mb-4">Добро пожаловать на сайт</h1>
-    <p class="lead">Чтобы получить доступ к функционалу, пожалуйста войдите в систему.</p>
+<div class="container mt-4">
+    <div class="jumbotron bg-light p-5 rounded mb-4">
+        <h1 class="display-4">Добро пожаловать в Hunsy!</h1>
+        <p class="lead">Платформа для публикации и продажи авторских постов</p>
+        <hr class="my-4">
+        <p>Создавайте посты, продавайте доступ или делитесь бесплатно</p>
+        {% if not user.is_authenticated %}
+            <a class="btn btn-primary btn-lg" href="{% url 'register' %}" role="button">
+                <i class="fas fa-user-plus"></i> Зарегистрироваться
+            </a>
+            <a class="btn btn-outline-primary btn-lg" href="{% url 'login' %}" role="button">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </a>
+        {% endif %}
+    </div>
 
-    <a href="{% url 'login' %}" class="btn btn-primary btn-lg mt-3">
-        Войти
-    </a>
+    <h2 class="mb-4">Последние публикации</h2>
+    
+    <div class="row">
+        {% for post in recent_posts %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if post.current_version.featured_image %}
+                        <img src="{{ post.current_version.featured_image.url }}" 
+                             class="card-img-top" alt="{{ post.current_version.title }}"
+                             style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" 
+                             style="height: 200px;">
+                            <i class="fas fa-image fa-3x"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.current_version.title }}</h5>
+                        <p class="card-text">{{ post.current_version.summary|truncatechars:100 }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge {% if post.access_type == 'free' %}bg-success{% else %}bg-warning{% endif %}">
+                                {% if post.access_type == 'free' %}
+                                    <i class="fas fa-unlock"></i> Бесплатно
+                                {% elif post.access_type == 'paid_once' %}
+                                    <i class="fas fa-lock"></i> ${{ post.price }}
+                                {% elif post.access_type == 'subscription' %}
+                                    <i class="fas fa-crown"></i> По подписке
+                                {% endif %}
+                            </span>
+                            
+                            <a href="{% url 'post_detail' post.uuid %}" class="btn btn-sm btn-outline-primary">
+                                Читать <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="text-muted small mt-2">
+                            <i class="fas fa-user"></i> {{ post.author.phone }} |
+                            <i class="fas fa-eye"></i> {{ post.view_count }} |
+                            <i class="fas fa-calendar"></i> {{ post.published_at|date:"d.m.Y" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Пока нет опубликованных постов. 
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'post_create' %}">Создайте первый пост!</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

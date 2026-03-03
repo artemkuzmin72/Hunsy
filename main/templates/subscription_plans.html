@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Планы подписки{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Выберите план подписки</h1>
+    
+    <div class="row">
+        {% for plan in plans %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title text-center">{{ plan.name }}</h3>
+                    <p class="card-text">{{ plan.description }}</p>
+                    
+                    <div class="text-center mb-3">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary" 
+                                    onclick="showMonthly({{ plan.id }})">
+                                Месячный
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" 
+                                    onclick="showYearly({{ plan.id }})">
+                                Годовой
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="monthly-{{ plan.id }}" style="display: none;">
+                        <h4 class="text-center text-primary">
+                            ${{ plan.price_monthly }}/месяц
+                        </h4>
+                        <a href="{% url 'create_checkout_session' plan.slug 'monthly' %}" 
+                           class="btn btn-primary w-100 mt-3">
+                            Подписаться
+                        </a>
+                    </div>
+                    
+                    <div id="yearly-{{ plan.id }}" style="display: none;">
+                        <h4 class="text-center text-primary">
+                            ${{ plan.price_yearly }}/год
+                            <small class="text-muted d-block">(экономия 20%)</small>
+                        </h4>
+                        <a href="{% url 'create_checkout_session' plan.slug 'yearly' %}" 
+                           class="btn btn-primary w-100 mt-3">
+                            Подписаться
+                        </a>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Возможности:</h5>
+                        <ul>
+                            {% for feature in plan.features %}
+                            <li>{{ feature }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function showMonthly(planId) {
+    document.getElementById('monthly-' + planId).style.display = 'block';
+    document.getElementById('yearly-' + planId).style.display = 'none';
+}
+
+function showYearly(planId) {
+    document.getElementById('monthly-' + planId).style.display = 'none';
+    document.getElementById('yearly-' + planId).style.display = 'block';
+}
+
+// Показываем месячный план по умолчанию для первого плана
+{% if plans.first %}
+showMonthly({{ plans.first.id }});
+{% endif %}
+</script>
+{% endblock %}
