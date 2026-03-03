@@ -111,7 +111,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+# Static files
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -137,3 +140,8 @@ STRIPE_PRICE_IDS = {
     'basic_yearly': 'price_basic_yearly_id',
     'premium_yearly': 'price_premium_yearly_id',
 }
+
+# Security
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-default-key')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
