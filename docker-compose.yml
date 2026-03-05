@@ -36,24 +36,9 @@ services:
       - media_volume:/app/media
     ports:
       - "8000:8000"
-    environment:
-      - DEBUG=${DEBUG}
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DATABASE_NAME=${DATABASE_NAME}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_HOST=db
-      - DATABASE_PORT=${DATABASE_PORT}
-      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
-      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
-      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
     depends_on:
       db:
         condition: service_healthy
-    env_file:
-      - .env
 
 volumes:
   postgres_data:

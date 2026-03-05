@@ -27,7 +27,7 @@
                         </div>
                     </div>
                     
-                    <div id="monthly-{{ plan.id }}" style="display: none;">
+                    <div id="monthly-{{ plan.id }}" style="display: block;">
                         <h4 class="text-center text-primary">
                             ${{ plan.price_monthly }}/месяц
                         </h4>
@@ -73,10 +73,5 @@ function showYearly(planId) {
     document.getElementById('monthly-' + planId).style.display = 'none';
     document.getElementById('yearly-' + planId).style.display = 'block';
 }
-
-// Показываем месячный план по умолчанию для первого плана
-{% if plans.first %}
-showMonthly({{ plans.first.id }});
-{% endif %}
 </script>
 {% endblock %}

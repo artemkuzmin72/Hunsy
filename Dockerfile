@@ -31,6 +31,3 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
 
 # Копирование проекта
 COPY . .
-
-# Команда для запуска приложения
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "Hunsy.wsgi:application"]

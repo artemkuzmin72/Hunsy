@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
-import datetime
+from datetime import datetime
 from .models import SubscriptionPlan, Subscription, Payment
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -188,8 +188,8 @@ def stripe_webhook(request):
     except ValueError:
         # Invalid payload
         return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError:
-        # Invalid signature
+    except Exception:
+        # Invalid signature or other Stripe errors
         return HttpResponse(status=400)
 
     # Обработка событий
