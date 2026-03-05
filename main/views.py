@@ -133,57 +133,65 @@ def post_create(request):
 
 def post_detail(request, uuid):
     """Просмотр поста с проверкой доступа"""
-    post = get_object_or_404(Post, uuid=uuid)
-
+    try:
+        post = get_object_or_404(Post, uuid=uuid)
+    except:
+        messages.error(request, 'Пост не найден')
+        return redirect('index')
+    
+    # Проверяем статус поста - автор всегда видит свои посты
+    if post.status != 'published' and request.user != post.author:
+        messages.error(request, 'Пост еще не опубликован')
+        return redirect('index')
+    
     # Проверяем доступ
     can_access = post.can_access(request.user)
-
-    # Если пост платный и нет доступа
-    if not can_access:
-        if post.access_type == "paid_once":
+    
+    # Отладка
+    print(f"DEBUG: User: {request.user}, Author: {post.author}")
+    print(f"DEBUG: Is author: {request.user.is_authenticated and request.user.id == post.author.id}")
+    print(f"DEBUG: can_access: {can_access}")
+    
+    # Если нет доступа и это не автор
+    if not can_access and request.user != post.author:
+        if post.access_type == 'paid_once':
             if not request.user.is_authenticated:
-                messages.warning(
-                    request, "Для покупки этого поста необходимо войти в систему"
-                )
-                return redirect(f'{reversed("login")}?next={request.path}')
-            return render(request, "post_locked.html", {"post": post})
-        elif post.access_type == "subscription":
-            return render(
-                request,
-                "post_subscription_required.html",
-                {"post": post, "required_plan": post.required_subscription},
-            )
-        # Для бесплатных постов всегда показываем содержимое
-        # Этот блок не должен выполняться для free постов
-
-    # Если доступ есть, показываем пост
-    if post.status == "published":
+                messages.warning(request, 'Для покупки этого поста необходимо войти в систему')
+                return redirect(f'{reverse("login")}?next={request.path}')
+            return render(request, 'post_locked.html', {'post': post})
+        elif post.access_type == 'subscription':
+            return render(request, 'post_subscription_required.html', {
+                'post': post,
+                'required_plan': post.required_subscription
+            })
+    
+    # Если доступ есть или это автор, показываем пост
+    if post.status == 'published':
         post.view_count += 1
-        post.save(update_fields=["view_count"])
-
+        post.save(update_fields=['view_count'])
+    
     # Получаем версию для отображения
-    version_id = request.GET.get("version")
+    version_id = request.GET.get('version')
     if version_id and request.user == post.author:
         version = post.get_version(version_id)
     else:
         version = post.current_version
-
-    versions = None
-    if request.user == post.author:
-        versions = post.get_all_versions()
-
-    return render(
-        request,
-        "post_detail.html",
-        {
-            "post": post,
-            "version": version,
-            "versions": versions,
-            "can_access": can_access,
-            "is_purchased": request.user.is_authenticated
-            and post.purchased_by.filter(id=request.user.id).exists(),
-        },
-    )
+    
+    # Проверяем, куплен ли пост (для отображения в шаблоне)
+    is_purchased = False
+    if request.user.is_authenticated:
+        is_purchased = post.purchased_by.filter(id=request.user.id).exists()
+    
+    # Для автора показываем специальный статус
+    is_author = request.user.is_authenticated and request.user.id == post.author.id
+    
+    return render(request, 'post_detail.html', {
+        'post': post,
+        'version': version,
+        'is_purchased': is_purchased,
+        'is_author': is_author,
+        'can_access': can_access
+    })
 
 
 @login_required

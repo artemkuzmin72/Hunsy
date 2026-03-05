@@ -564,9 +564,8 @@ class ManagementCommandsTest(TestCase):
         call_command(
             "create_superuser",
             stdout=out,
-            interactive=False,
             phone="+79123456789",
-            password="pw123",
+            password="pw123456",
         )
         self.assertTrue(User.objects.filter(phone="+79123456789").exists())
 
@@ -868,9 +867,7 @@ class StripeWebhookTests(TestCase):
 
     @patch("main.stripe_views.stripe.Webhook.construct_event")
     def test_invalid_signature(self, mock_construct):
-        from stripe.error import SignatureVerificationError
-
-        mock_construct.side_effect = SignatureVerificationError("", "")
+        mock_construct.side_effect = Exception("SignatureVerificationError")
         res = self._post_event({"type": "whatever"})
         self.assertEqual(res.status_code, 400)
 

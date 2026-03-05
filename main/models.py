@@ -175,24 +175,28 @@ class Post(models.Model):
 
     def can_access(self, user):
         """Проверка, имеет ли пользователь доступ к посту"""
-        # Бесплатные посты доступны всем
-        if self.access_type == "free":
+        # Автор всегда имеет доступ к своему посту
+        if user and user.is_authenticated and user.id == self.author.id:
             return True
-
+        
+        # Бесплатные посты доступны всем
+        if self.access_type == 'free':
+            return True
+        
         # Для остальных типов доступа нужен авторизованный пользователь
         if not user or not user.is_authenticated:
             return False
-
-        if self.access_type == "paid_once":
+        
+        if self.access_type == 'paid_once':
             return self.purchased_by.filter(id=user.id).exists()
-
-        if self.access_type == "subscription" and self.required_subscription:
+        
+        if self.access_type == 'subscription' and self.required_subscription:
             return user.subscriptions.filter(
                 plan=self.required_subscription,
-                status="active",
-                current_period_end__gt=timezone.now(),
+                status='active',
+                current_period_end__gt=timezone.now()
             ).exists()
-
+        
         return False
 
     def get_price_display(self):

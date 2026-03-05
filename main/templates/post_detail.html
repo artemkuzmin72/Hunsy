@@ -8,10 +8,45 @@
         <div class="col-md-8">
             <article class="card shadow">
                 {% if version.featured_image %}
-                    <img src="{{ version.featured_image.url }}" class="card-img-top" alt="{{ version.title }}">
+                    <img src="{{ version.featured_image.url }}" 
+                         class="card-img-top" 
+                         alt="{{ version.title }}"
+                         style="max-height: 400px; object-fit: cover;">
                 {% endif %}
                 
                 <div class="card-body">
+                    <!-- Статус поста -->
+                    <div class="mb-3">
+                        {% if is_author %}
+                            <span class="badge bg-info">
+                                <i class="fas fa-pen"></i> Вы автор
+                            </span>
+                        {% endif %}
+                        
+                        {% if post.access_type == 'free' %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-unlock"></i> Бесплатно
+                            </span>
+                        {% elif post.access_type == 'paid_once' %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-lock"></i> Платный пост - ${{ post.price }}
+                            </span>
+                            {% if is_purchased %}
+                                <span class="badge bg-info">
+                                    <i class="fas fa-check-circle"></i> Доступ приобретен
+                                </span>
+                            {% endif %}
+                        {% elif post.access_type == 'subscription' %}
+                            <span class="badge bg-primary">
+                                <i class="fas fa-crown"></i> По подписке: {{ post.required_subscription.name }}
+                            </span>
+                        {% endif %}
+                        
+                        {% if post.status == 'draft' %}
+                            <span class="badge bg-secondary">Черновик</span>
+                        {% endif %}
+                    </div>
+                    
                     <h1 class="card-title">{{ version.title }}</h1>
                     
                     <div class="text-muted mb-3">
@@ -31,8 +66,6 @@
                             <span class="badge bg-success">Опубликован</span>
                             <span class="badge bg-info">Просмотров: {{ post.view_count }}</span>
                         </div>
-                    {% elif post.status == 'draft' %}
-                        <span class="badge bg-warning">Черновик</span>
                     {% endif %}
                     
                     <div class="card-text mt-4">
@@ -43,10 +76,11 @@
         </div>
         
         <div class="col-md-4">
-            {% if user == post.author %}
+            <!-- Боковая панель для автора -->
+            {% if user.is_authenticated and user.id == post.author.id %}
                 <div class="card shadow mb-3">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Управление</h5>
+                        <h5 class="mb-0">Управление постом</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
@@ -67,7 +101,29 @@
                 </div>
             {% endif %}
             
-            {% if versions %}
+            <!-- Информация о доступе для обычных пользователей -->
+            {% if not is_author and not can_access %}
+                <div class="card shadow mb-3">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0 text-white">Доступ ограничен</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Этот пост доступен только после оплаты или оформления подписки.</p>
+                        {% if post.access_type == 'paid_once' %}
+                            <a href="{% url 'post_purchase' post.uuid %}" class="btn btn-primary w-100">
+                                <i class="fas fa-shopping-cart"></i> Купить за ${{ post.price }}
+                            </a>
+                        {% elif post.access_type == 'subscription' %}
+                            <a href="{% url 'subscription_plans' %}" class="btn btn-primary w-100">
+                                <i class="fas fa-crown"></i> Оформить подписку
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Другие версии для автора -->
+            {% if versions and user.is_authenticated and user.id == post.author.id %}
                 <div class="card shadow">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0">Другие версии</h5>
@@ -82,6 +138,9 @@
                                             <br><small>{{ v.change_summary|truncatechars:30 }}</small>
                                         {% endif %}
                                     </a>
+                                    {% if v.id == post.current_version.id %}
+                                        <span class="badge bg-success float-end">Текущая</span>
+                                    {% endif %}
                                 </li>
                             {% endfor %}
                         </ul>
