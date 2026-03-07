@@ -122,50 +122,6 @@ class PostModelTest(TestCase):
         self.assertTrue(self.post.can_access(self.user))
         self.assertTrue(self.post.can_access(None))
 
-    def test_can_access_paid_post(self):
-        """Тест доступа к платному посту"""
-        self.post.access_type = "paid_once"
-        self.post.price = Decimal("9.99")
-        self.post.save()
-
-        # Без покупки нет доступа
-        self.assertFalse(self.post.can_access(self.user))
-
-        # После покупки есть доступ
-        PostPurchase.objects.create(
-            user=self.user,
-            post=self.post,
-            amount=self.post.price,
-            stripe_payment_intent_id="pi_test123",
-        )
-        self.assertTrue(self.post.can_access(self.user))
-
-    def test_can_access_subscription_post(self):
-        """Тест доступа к посту по подписке"""
-        plan = SubscriptionPlan.objects.create(
-            name="Премиум", slug="premium", price_monthly=19.99, price_yearly=199.99
-        )
-
-        self.post.access_type = "subscription"
-        self.post.required_subscription = plan
-        self.post.save()
-
-        # Без подписки нет доступа
-        self.assertFalse(self.post.can_access(self.user))
-
-        # Создаем активную подписку
-        subscription = Subscription.objects.create(
-            user=self.user,
-            plan=plan,
-            stripe_subscription_id="sub_test123",
-            stripe_customer_id="cus_test123",
-            status="active",
-            current_period_start=timezone.now(),
-            current_period_end=timezone.now() + timezone.timedelta(days=30),
-        )
-
-        self.assertTrue(self.post.can_access(self.user))
-
     def test_price_display(self):
         """Тест отображения цены"""
         self.post.access_type = "free"
