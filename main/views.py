@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
 from django.http import JsonResponse
+from django.utils import timezone
+from decimal import Decimal, InvalidOperation
 from .models import (
     Post,
     PostVersion,
@@ -426,13 +428,42 @@ def post_purchase(request, uuid):
 def post_purchase_confirm(request, uuid):
     """Подтверждение успешной покупки"""
     post = get_object_or_404(Post, uuid=uuid)
-    amount = request.POST.get("amount")
+
+    # Разрешаем подтверждать только разовые платные посты
+    if post.access_type != "paid_once":
+        messages.error(request, "Этот пост не поддерживает разовый платёж")
+        return redirect("post_detail", uuid=post.uuid)
+
+    amount_raw = request.POST.get("amount")
+    payment_intent_id = request.POST.get("payment_intent_id")
+
+    # Пытаемся аккуратно распарсить сумму
+    try:
+        amount = Decimal(str(amount_raw))
+    except (InvalidOperation, TypeError):
+        amount = post.price or Decimal("0")
+
+    # Если по какой‑то причине Stripe не прислал ID, генерируем стабильный fallback,
+    # чтобы не ломать уникальный индекс и всё равно выдать доступ пользователю.
+    if not payment_intent_id:
+        payment_intent_id = f"manual_{post.id}_{request.user.id}_{int(timezone.now().timestamp())}"
 
     try:
+        # Создаём запись о покупке (даёт доступ к посту через Post.purchased_by)
+        from .models import PostPurchase
+
+        PostPurchase.objects.get_or_create(
+            user=request.user,
+            post=post,
+            defaults={
+                "amount": amount,
+                "stripe_payment_intent_id": payment_intent_id,
+            },
+        )
 
         # Обновляем баланс пользователя (опционально)
-        request.user.balance -= float(amount)
-        request.user.total_purchases += float(amount)
+        request.user.balance -= amount
+        request.user.total_purchases += amount
         request.user.save()
 
         messages.success(
@@ -441,6 +472,51 @@ def post_purchase_confirm(request, uuid):
 
     except Exception as e:
         messages.error(request, f"Ошибка при подтверждении покупки: {str(e)}")
+
+    return redirect("post_detail", uuid=post.uuid)
+
+
+@login_required
+@require_POST
+def post_purchase_from_balance(request, uuid):
+    """Оплата доступа к посту с внутреннего баланса"""
+    post = get_object_or_404(Post, uuid=uuid, access_type="paid_once", status="published")
+
+    # Если уже куплено - просто редиректим
+    if post.purchased_by.filter(id=request.user.id).exists():
+        messages.info(request, "У вас уже есть доступ к этому посту")
+        return redirect("post_detail", uuid=post.uuid)
+
+    if post.price is None:
+        messages.error(request, "Для этого поста не указана цена")
+        return redirect("post_detail", uuid=post.uuid)
+
+    # Проверяем баланс
+    if request.user.balance < post.price:
+        messages.error(request, "Недостаточно средств на балансе")
+        return redirect("post_detail", uuid=post.uuid)
+
+    try:
+        # Создаём запись о покупке
+        PostPurchase.objects.get_or_create(
+            user=request.user,
+            post=post,
+            defaults={
+                "amount": post.price,
+                "stripe_payment_intent_id": f"balance_{post.id}_{request.user.id}_{int(timezone.now().timestamp())}",
+            },
+        )
+
+        # Списываем с баланса
+        request.user.balance -= post.price
+        request.user.total_purchases += post.price
+        request.user.save()
+
+        messages.success(
+            request, f'Пост "{post.current_version.title}" оплачен с баланса!'
+        )
+    except Exception as e:
+        messages.error(request, f"Ошибка при оплате с баланса: {str(e)}")
 
     return redirect("post_detail", uuid=post.uuid)
 

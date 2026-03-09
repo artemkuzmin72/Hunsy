@@ -23,6 +23,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'index' %}">Главная</a>
                     </li>
+                    <li class="nav-item">
+                        <span class="nav-link disabled">
+                            Баланс: ${{ user.balance }}
+                        </span>
+                    </li>
                     <form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
                         <button class="nav-link" type="submit">Выйти</button>

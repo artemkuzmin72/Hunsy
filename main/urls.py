@@ -48,6 +48,11 @@ urlpatterns = [
         name="post_purchase_confirm",
     ),
     path(
+        "post/<uuid:uuid>/purchase/balance/",
+        views.post_purchase_from_balance,
+        name="post_purchase_balance",
+    ),
+    path(
         "post/<uuid:uuid>/access-check/",
         views.post_access_check,
         name="post_access_check",
