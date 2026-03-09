@@ -10,16 +10,28 @@
                 <div class="card-header bg-warning">
                     <h4 class="mb-0 text-white">Доступ ограничен</h4>
                 </div>
-                <div class="card-body text-center">
+                    <div class="card-body text-center">
                     <i class="fas fa-lock fa-4x text-warning mb-3"></i>
                     <h3>Этот пост платный</h3>
                     <p class="lead">{{ post.current_version.title }}</p>
                     
                     <div class="alert alert-info">
                         <strong>Цена:</strong> ${{ post.price }}
+                        {% if user.is_authenticated %}
+                            <br>Ваш баланс: <strong>${{ user.balance }}</strong>
+                        {% endif %}
                     </div>
                     
                     {% if user.is_authenticated %}
+                        {% if user.balance >= post.price %}
+                            <form method="post" action="{% url 'post_purchase_balance' post.uuid %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-success btn-lg mb-2">
+                                    <i class="fas fa-wallet"></i> Оплатить с баланса
+                                </button>
+                            </form>
+                            <br>
+                        {% endif %}
                         <a href="{% url 'post_purchase' post.uuid %}" class="btn btn-primary btn-lg">
                             <i class="fas fa-shopping-cart"></i> Купить доступ
                         </a>

@@ -110,6 +110,23 @@
                     <div class="card-body">
                         <p>Этот пост доступен только после оплаты или оформления подписки.</p>
                         {% if post.access_type == 'paid_once' %}
+                            {% if user.is_authenticated %}
+                                <p class="mb-2">
+                                    Ваш баланс: <strong>${{ user.balance }}</strong>
+                                </p>
+                                {% if user.balance >= post.price %}
+                                    <form method="post" action="{% url 'post_purchase_balance' post.uuid %}" class="mb-2">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-success w-100">
+                                            <i class="fas fa-wallet"></i> Оплатить с баланса
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <p class="text-muted mb-2">
+                                        Недостаточно средств на балансе для оплаты этого поста.
+                                    </p>
+                                {% endif %}
+                            {% endif %}
                             <a href="{% url 'post_purchase' post.uuid %}" class="btn btn-primary w-100">
                                 <i class="fas fa-shopping-cart"></i> Купить за ${{ post.price }}
                             </a>
